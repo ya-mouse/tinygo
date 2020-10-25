@@ -3,6 +3,8 @@
 
 package interrupt
 
+// This is good documentation of the GBA: https://www.akkit.org/info/gbatek.htm
+
 import (
 	"runtime/volatile"
 	"unsafe"
@@ -37,8 +39,11 @@ func (irq Interrupt) Enable() {
 	regInterruptEnable.SetBits(1 << uint(irq.num))
 }
 
+var inInterrupt bool
+
 //export handleInterrupt
 func handleInterrupt() {
+	inInterrupt = true
 	flags := regInterruptRequestFlags.Get()
 	for i := 0; i < 14; i++ {
 		if flags&(1<<uint(i)) != 0 {
@@ -46,6 +51,7 @@ func handleInterrupt() {
 			callInterruptHandler(i)
 		}
 	}
+	inInterrupt = false
 }
 
 // Pseudo function call that is replaced by the compiler with the actual
@@ -115,4 +121,9 @@ func Disable() (state State) {
 func Restore(state State) {
 	// Restore interrupts to the previous state.
 	regGlobalInterruptEnable.Set(uint16(state))
+}
+
+// In returns whether the system is currently in an interrupt.
+func In() bool {
+	return inInterrupt
 }

@@ -267,6 +267,10 @@ func alloc(size uintptr, layout unsafe.Pointer) unsafe.Pointer {
 		return unsafe.Pointer(&zeroSizedAlloc)
 	}
 
+	if interrupt.In() {
+		runtimePanic("alloc in interrupt")
+	}
+
 	gcTotalAlloc += uint64(size)
 	gcMallocs++
 
