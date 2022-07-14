@@ -131,6 +131,7 @@ func handleUSBIRQ(intr interrupt.Interrupt) {
 		rp.USBCTRL_REGS.ADDR_ENDP.Set(0)
 
 		initEndpoint(0, usb.ENDPOINT_TYPE_CONTROL)
+		fixRP2040UsbDeviceEnumeration()
 	}
 }
 
