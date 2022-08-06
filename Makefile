@@ -342,7 +342,7 @@ endif
 # testing/fstest requires os.ReadDir, which is not yet supported on windows or wasi
 
 # Additional standard library packages that pass tests on individual platforms
-TEST_PACKAGES_LINUX := \
+TEST_PACKAGES_DARWIN := \
 	archive/zip \
 	compress/flate \
 	compress/lzw \
@@ -354,7 +354,10 @@ TEST_PACKAGES_LINUX := \
 	testing/fstest \
 	text/template/parse
 
-TEST_PACKAGES_DARWIN := $(TEST_PACKAGES_LINUX)
+TEST_PACKAGES_LINUX := \
+	$(TEST_PACKAGES_DARWIN) \
+	crypto/aes
+
 
 TEST_PACKAGES_WINDOWS := \
 	compress/flate \
