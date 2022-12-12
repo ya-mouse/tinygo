@@ -49,8 +49,8 @@ func (p Pin) getPortPin() (*nrf.GPIO_Type, uint32) {
 }
 
 func (uart *UART) setPins(tx, rx Pin) {
-	nrf.UART0.PSELTXD.Set(uint32(tx))
-	nrf.UART0.PSELRXD.Set(uint32(rx))
+	uart.UART_Type.PSELTXD.Set(uint32(tx))
+	uart.UART_Type.PSELRXD.Set(uint32(rx))
 }
 
 func (i2c *I2C) setPins(scl, sda Pin) {

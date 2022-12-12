@@ -1,5 +1,5 @@
-//go:build nrf && !nrf52840 && !nrf9160
-// +build nrf,!nrf52840,!nrf9160
+//go:build nrf9160
+// +build nrf9160
 
 package runtime
 
@@ -18,6 +18,19 @@ func systemInit()
 
 //export Reset_Handler
 func main() {
+	// Reset CONTROL register
+	arm.AsmFull(`movs.n {}, #0
+		     msr CONTROL, {}
+		     isb`, nil)
+
+	// Clear SPLIM registers
+	arm.AsmFull(`movs.n {}, #0
+		     msr MSPLIM, {}
+		     msr PSPLIM, {}`, nil)
+
+	// lock interrupts: will get unlocked when switch to main task
+	arm.AsmFull(`movs.n {}, #0
+		     msr BASEPRI, {}`, nil)
 	if nrf.FPUPresent {
 		arm.SCB.CPACR.Set(0) // disable FPU if it is enabled
 	}
@@ -35,7 +48,7 @@ func init() {
 
 func initLFCLK() {
 	if machine.HasLowFrequencyCrystal {
-		nrf.CLOCK.LFCLKSRC.Set(nrf.CLOCK_LFCLKSTAT_SRC_Xtal)
+		nrf.CLOCK.LFCLKSRC.Set(nrf.CLOCK_LFCLKSTAT_SRC_LFRC)
 	}
 	nrf.CLOCK.TASKS_LFCLKSTART.Set(1)
 	for nrf.CLOCK.EVENTS_LFCLKSTARTED.Get() == 0 {
@@ -67,7 +80,7 @@ func putchar(c byte) {
 }
 
 func getchar() byte {
-	for machine.Serial.Buffered() == 0 {
+	for buffered() == 0 {
 		Gosched()
 	}
 	v, _ := machine.Serial.ReadByte()
